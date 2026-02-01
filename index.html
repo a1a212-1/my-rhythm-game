@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PLEAD Pro - Custom Background Edition</title>
+    <title>PLEAD Pro - Tutorial Edition</title>
     <style>
         :root { 
             --accent: #00d4ff; 
@@ -19,16 +19,28 @@
             user-select: none; touch-action: none;
         }
 
-        /* 遊戲主容器：在這裡設定背景圖 */
         #game-container { 
             position: relative; width: 100%; max-width: 450px; height: 100vh; 
             margin: 0 auto; overflow: hidden;
             border-left: 2px solid #333; border-right: 2px solid #333;
-            
-            /* 背景圖設定 */
-            background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('bg.jpg');
-            background-size: cover;
-            background-position: center;
+            background-image: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('bg.jpg');
+            background-size: cover; background-position: center;
+        }
+
+        /* 新手教學覆蓋層 */
+        #tutorial-overlay {
+            position: absolute; inset: 0; background: rgba(0,0,0,0.9);
+            z-index: 20000; display: flex; flex-direction: column; 
+            align-items: center; justify-content: center; padding: 20px;
+        }
+        .step { margin: 15px 0; text-align: center; }
+        .key-tip { display: inline-block; padding: 5px 10px; border: 1px solid var(--accent); border-radius: 5px; color: var(--accent); font-weight: bold; }
+
+        /* 開始覆蓋層 */
+        #start-overlay {
+            position: absolute; inset: 0; background: rgba(0,0,0,0.8);
+            z-index: 10000; display: none; flex-direction: column; 
+            align-items: center; justify-content: center;
         }
 
         #judge-line { 
@@ -37,53 +49,60 @@
             box-shadow: 0 0 20px var(--accent);
         }
 
-        /* 音符視覺：增加一點發光感，在背景圖上更明顯 */
-        .note { 
-            position: absolute; width: 25%; background: #fff; 
-            border: 2px solid #000; box-sizing: border-box; 
-            z-index: 10; border-radius: 4px;
-            box-shadow: 0 0 5px rgba(255,255,255,0.5);
-        }
-        .note.hold { 
-            background: rgba(0, 143, 179, 0.9); border: 2px solid #fff; 
-            box-shadow: inset 0 0 10px #00d4ff;
-        }
+        .note { position: absolute; width: 25%; background: #fff; border: 2px solid #000; box-sizing: border-box; z-index: 10; border-radius: 4px; }
+        .note.hold { background: rgba(0, 143, 179, 0.9); border: 2px solid #fff; box-shadow: inset 0 0 10px #00d4ff; }
         .note.active-hold { background: var(--accent) !important; box-shadow: 0 0 30px var(--accent); }
         .note.missed { background: #222 !important; border-color: #444 !important; opacity: 0.3; }
 
-        /* UI 顯示 */
         #ui { position: absolute; top: 10%; width: 100%; text-align: center; z-index: 1000; pointer-events: none; }
         #score-display { font-size: 24px; font-family: monospace; letter-spacing: 2px; }
         #combo-display { font-size: 64px; font-weight: 900; margin: 10px 0; }
         #rating-display { font-size: 32px; font-weight: 900; font-style: italic; height: 40px; }
 
-        .rating-perfect { color: var(--perfect); text-shadow: 0 0 15px var(--perfect); }
-        .rating-great { color: var(--great); text-shadow: 0 0 15px var(--great); }
-        .rating-good { color: var(--good); text-shadow: 0 0 15px var(--good); }
-        .rating-miss { color: #ff4d4d; }
-
-        /* 結算畫面 */
         #result-screen {
             position: absolute; inset: 0; background: rgba(0,0,0,0.95); z-index: 5000;
             display: none; flex-direction: column; align-items: center; justify-content: center;
-            text-align: center;
         }
-        .res-row { font-size: 20px; margin: 5px 0; width: 220px; display: flex; justify-content: space-between; }
-        #final-score { font-size: 56px; color: var(--perfect); margin: 20px 0; font-weight: bold; }
 
         #touch-controls { position: absolute; inset: 0; z-index: 2000; display: flex; }
         .touch-zone { flex: 1; }
         .touch-zone:active { background: rgba(255,255,255,0.1); }
+        
+        button {
+            padding: 15px 40px; font-size: 18px; border-radius: 50px; border: none; 
+            background: var(--accent); color: #000; font-weight: bold; cursor: pointer;
+        }
     </style>
 </head>
 <body>
 
 <div id="game-container">
+    <div id="tutorial-overlay">
+        <h2 style="color:var(--accent)">HOW TO PLAY</h2>
+        <div class="step">
+            <p>使用四根手指點擊對應軌道</p>
+            <span class="key-tip">D</span> <span class="key-tip">F</span> <span class="key-tip">J</span> <span class="key-tip">K</span>
+        </div>
+        <div class="step">
+            <p>當音符到達 <b style="color:var(--accent)">藍色判定線</b> 時點擊</p>
+            <p style="font-size: 0.9em; opacity: 0.8;">長按音符請按住直到結尾</p>
+        </div>
+        <div class="step" style="margin-top: 30px;">
+            <button id="close-tutorial">我知道了</button>
+        </div>
+    </div>
+
+    <div id="start-overlay">
+        <h1 style="color:var(--accent)">READY?</h1>
+        <button id="start-btn">START</button>
+    </div>
+
     <div id="ui">
         <div id="score-display">0000000</div>
         <div id="combo-display">0</div>
         <div id="rating-display"></div>
     </div>
+    
     <div id="judge-line"></div>
     <div id="notes-layer"></div>
     
@@ -95,21 +114,19 @@
     </div>
 
     <div id="result-screen">
-        <h1 style="color:var(--accent); letter-spacing: 5px;">RESULTS</h1>
-        <div id="final-score">0</div>
-        <div class="res-row"><span>Perfect</span><span id="res-p" style="color:var(--perfect)">0</span></div>
-        <div class="res-row"><span>Great</span><span id="res-gr" style="color:var(--great)">0</span></div>
-        <div class="res-row"><span>Good</span><span id="res-go" style="color:var(--good)">0</span></div>
-        <div class="res-row"><span>Miss</span><span id="res-m" style="color:#ff4d4d">0</span></div>
-        <div class="res-row" style="border-top:1px solid #444; margin-top:15px; padding-top:15px;">
-            <span>Max Combo</span><span id="res-mc">0</span>
+        <h1 style="color:var(--accent)">FINISH</h1>
+        <div id="final-score" style="font-size: 50px; color: var(--perfect); margin: 20px 0;">0</div>
+        <div style="width:200px">
+            <div style="display:flex; justify-content:space-between"><span>Perfect</span><span id="res-p">0</span></div>
+            <div style="display:flex; justify-content:space-between"><span>Great</span><span id="res-gr">0</span></div>
+            <div style="display:flex; justify-content:space-between"><span>Good</span><span id="res-go">0</span></div>
+            <div style="display:flex; justify-content:space-between"><span>Miss</span><span id="res-m">0</span></div>
         </div>
-        <button onclick="location.reload()" style="margin-top:40px; padding:15px 70px; border-radius:40px; border:none; background:var(--accent); color:#000; font-weight:bold; cursor:pointer; font-size:18px;">RETRY</button>
+        <button onclick="location.reload()" style="margin-top:30px">RETRY</button>
     </div>
 </div>
 
 <script>
-    // 完整譜面數據
     const sheetData = [{"t":625,"l":2,"d":125},{"t":625,"l":1,"d":125},{"t":1375,"l":2,"d":125},{"t":1375,"l":1,"d":125},{"t":2000,"l":1,"d":125},{"t":2000,"l":2,"d":125},{"t":3000,"l":1,"d":125},{"t":3000,"l":2,"d":125},{"t":3500,"l":3,"d":125},{"t":3500,"l":0,"d":125},{"t":4000,"l":1,"d":750},{"t":4000,"l":2,"d":750},{"t":5125,"l":0,"d":125},{"t":5125,"l":3,"d":125},{"t":5625,"l":1,"d":125},{"t":5625,"l":2,"d":125},{"t":6000,"l":2,"d":750},{"t":6000,"l":1,"d":750},{"t":7125,"l":3,"d":125},{"t":7125,"l":0,"d":125},{"t":8000,"l":1,"d":750},{"t":8000,"l":2,"d":750},{"t":9000,"l":3,"d":125},{"t":9000,"l":0,"d":125},{"t":9875,"l":2,"d":625},{"t":9875,"l":1,"d":625},{"t":11000,"l":3,"d":125},{"t":11000,"l":0,"d":125},{"t":12000,"l":1,"d":1125},{"t":12000,"l":2,"d":1125},{"t":13250,"l":0,"d":125},{"t":13250,"l":3,"d":125},{"t":13750,"l":3,"d":125},{"t":13750,"l":0,"d":125},{"t":14000,"l":1,"d":875},{"t":14000,"l":2,"d":875},{"t":15125,"l":3,"d":125},{"t":15125,"l":0,"d":125},{"t":16125,"l":2,"d":125},{"t":16125,"l":1,"d":125},{"t":17000,"l":0,"d":125},{"t":17000,"l":3,"d":125},{"t":17500,"l":2,"d":375},{"t":17500,"l":1,"d":375},{"t":18000,"l":0,"d":125},{"t":18000,"l":3,"d":125},{"t":18875,"l":0,"d":875},{"t":18875,"l":3,"d":875},{"t":20125,"l":1,"d":125},{"t":20125,"l":2,"d":125},{"t":20500,"l":0,"d":125},{"t":20500,"l":3,"d":125},{"t":21000,"l":1,"d":125},{"t":21000,"l":2,"d":125},{"t":21375,"l":3,"d":125},{"t":21375,"l":0,"d":125},{"t":22375,"l":3,"d":125},{"t":22375,"l":0,"d":125},{"t":23000,"l":1,"d":625},{"t":23000,"l":2,"d":625},{"t":24000,"l":0,"d":3875},{"t":24000,"l":3,"d":4000},{"t":24875,"l":2,"d":125},{"t":24875,"l":1,"d":125},{"t":26000,"l":1,"d":125},{"t":26000,"l":2,"d":125},{"t":27125,"l":1,"d":125},{"t":27125,"l":2,"d":125},{"t":27750,"l":0,"d":125},{"t":27875,"l":0,"d":125},{"t":28000,"l":2,"d":3750},{"t":28000,"l":1,"d":3750},{"t":28875,"l":0,"d":125},{"t":28875,"l":3,"d":125},{"t":29625,"l":3,"d":125},{"t":29625,"l":0,"d":125},{"t":30000,"l":0,"d":125},{"t":30000,"l":3,"d":125},{"t":30875,"l":0,"d":125},{"t":30875,"l":3,"d":125},{"t":32000,"l":0,"d":125},{"t":32000,"l":3,"d":125},{"t":32250,"l":1,"d":375},{"t":32250,"l":2,"d":375},{"t":32625,"l":0,"d":500},{"t":32625,"l":3,"d":500},{"t":33125,"l":1,"d":375},{"t":33125,"l":2,"d":375},{"t":33500,"l":0,"d":250},{"t":33500,"l":3,"d":250},{"t":34125,"l":3,"d":125},{"t":34125,"l":0,"d":125},{"t":34250,"l":2,"d":125},{"t":34250,"l":1,"d":125},{"t":34750,"l":1,"d":125},{"t":34750,"l":2,"d":125},{"t":34750,"l":0,"d":125},{"t":34750,"l":3,"d":125},{"t":35125,"l":3,"d":125},{"t":35125,"l":0,"d":125},{"t":35250,"l":3,"d":125},{"t":35250,"l":0,"d":125},{"t":35500,"l":0,"d":125},{"t":35500,"l":3,"d":125},{"t":35875,"l":1,"d":2000},{"t":35875,"l":2,"d":2000},{"t":38000,"l":0,"d":750},{"t":38000,"l":3,"d":875},{"t":39000,"l":1,"d":875},{"t":39000,"l":2,"d":875},{"t":40000,"l":0,"d":750},{"t":40000,"l":3,"d":750},{"t":40875,"l":1,"d":1000},{"t":40875,"l":2,"d":1000},{"t":41875,"l":0,"d":1000},{"t":41875,"l":3,"d":1000},{"t":42875,"l":1,"d":875},{"t":42875,"l":2,"d":875},{"t":44000,"l":2,"d":1250},{"t":44000,"l":1,"d":1250},{"t":45500,"l":0,"d":125},{"t":45500,"l":3,"d":125},{"t":45750,"l":1,"d":125},{"t":45750,"l":2,"d":125},{"t":46000,"l":3,"d":500},{"t":46000,"l":0,"d":625},{"t":46875,"l":1,"d":125},{"t":46875,"l":2,"d":125},{"t":46875,"l":0,"d":125},{"t":46875,"l":3,"d":125},{"t":47375,"l":3,"d":125},{"t":47375,"l":0,"d":125},{"t":47500,"l":1,"d":125},{"t":47500,"l":2,"d":125},{"t":47875,"l":1,"d":125},{"t":47875,"l":2,"d":125},{"t":48000,"l":3,"d":125},{"t":48000,"l":0,"d":125},{"t":48625,"l":0,"d":125},{"t":48625,"l":3,"d":125},{"t":48750,"l":0,"d":125},{"t":48750,"l":3,"d":125},{"t":48875,"l":0,"d":125},{"t":48875,"l":3,"d":125},{"t":49125,"l":0,"d":125},{"t":49125,"l":3,"d":125},{"t":49375,"l":1,"d":125},{"t":49375,"l":2,"d":125},{"t":49625,"l":0,"d":125},{"t":49625,"l":3,"d":125},{"t":50000,"l":2,"d":625},{"t":50000,"l":1,"d":625},{"t":50625,"l":0,"d":1750},{"t":50625,"l":3,"d":1750},{"t":51375,"l":2,"d":125},{"t":51375,"l":1,"d":125},{"t":51625,"l":1,"d":125},{"t":51625,"l":2,"d":125},{"t":51750,"l":1,"d":125},{"t":51750,"l":2,"d":125},{"t":52000,"l":1,"d":125},{"t":52000,"l":2,"d":125},{"t":52500,"l":1,"d":500},{"t":52500,"l":2,"d":500},{"t":52875,"l":0,"d":625},{"t":53000,"l":3,"d":500},{"t":53750,"l":2,"d":125},{"t":53750,"l":1,"d":125},{"t":54000,"l":3,"d":125},{"t":54250,"l":2,"d":125},{"t":54500,"l":1,"d":125},{"t":54625,"l":0,"d":125},{"t":54875,"l":2,"d":125},{"t":54875,"l":3,"d":125},{"t":55000,"l":0,"d":125},{"t":55375,"l":3,"d":125},{"t":55375,"l":0,"d":125},{"t":56000,"l":1,"d":125},{"t":56125,"l":2,"d":125},{"t":56250,"l":3,"d":125},{"t":56375,"l":0,"d":125},{"t":56625,"l":0,"d":125},{"t":56625,"l":3,"d":125},{"t":56750,"l":1,"d":125},{"t":56750,"l":2,"d":250},{"t":57000,"l":0,"d":125},{"t":57000,"l":3,"d":125},{"t":57125,"l":1,"d":125},{"t":57125,"l":2,"d":125},{"t":57250,"l":3,"d":125},{"t":57250,"l":0,"d":125},{"t":57500,"l":1,"d":125},{"t":57500,"l":2,"d":125},{"t":57750,"l":1,"d":125},{"t":57750,"l":2,"d":125},{"t":58000,"l":0,"d":125},{"t":58000,"l":3,"d":125},{"t":58250,"l":1,"d":125},{"t":58250,"l":2,"d":125},{"t":58375,"l":1,"d":125},{"t":58375,"l":2,"d":125},{"t":58625,"l":1,"d":125},{"t":58625,"l":2,"d":125},{"t":58875,"l":0,"d":125},{"t":58875,"l":3,"d":125},{"t":59375,"l":3,"d":125},{"t":59625,"l":3,"d":125},{"t":60000,"l":3,"d":125},{"t":60500,"l":2,"d":125},{"t":61000,"l":1,"d":125},{"t":61500,"l":0,"d":125},{"t":62125,"l":0,"d":125},{"t":62125,"l":3,"d":125},{"t":62250,"l":3,"d":125},{"t":62375,"l":0,"d":125},{"t":62625,"l":1,"d":125},{"t":62625,"l":2,"d":125},{"t":62750,"l":2,"d":125},{"t":62750,"l":1,"d":125},{"t":64000,"l":1,"d":125},{"t":64000,"l":2,"d":125},{"t":64250,"l":3,"d":125},{"t":64250,"l":0,"d":125},{"t":64500,"l":1,"d":125},{"t":64500,"l":2,"d":125},{"t":64625,"l":0,"d":125},{"t":64625,"l":3,"d":125},{"t":65000,"l":0,"d":125},{"t":65000,"l":3,"d":125},{"t":65125,"l":2,"d":125},{"t":65125,"l":1,"d":125},{"t":65250,"l":3,"d":125},{"t":65250,"l":0,"d":125},{"t":65375,"l":2,"d":125},{"t":65375,"l":1,"d":125},{"t":65375,"l":0,"d":125},{"t":65375,"l":3,"d":125},{"t":65625,"l":0,"d":125},{"t":65625,"l":3,"d":125},{"t":65625,"l":1,"d":125},{"t":65625,"l":2,"d":125},{"t":66000,"l":1,"d":125},{"t":66000,"l":2,"d":125},{"t":66250,"l":1,"d":125},{"t":66250,"l":2,"d":125},{"t":66500,"l":3,"d":125},{"t":66500,"l":0,"d":125},{"t":66625,"l":0,"d":125},{"t":66625,"l":3,"d":125},{"t":66875,"l":0,"d":125},{"t":66875,"l":3,"d":125},{"t":67375,"l":1,"d":125},{"t":67375,"l":2,"d":125},{"t":67750,"l":3,"d":125},{"t":67750,"l":0,"d":125},{"t":68000,"l":3,"d":125},{"t":68500,"l":2,"d":125},{"t":69000,"l":1,"d":125},{"t":69500,"l":0,"d":125},{"t":70000,"l":3,"d":125},{"t":70125,"l":2,"d":125},{"t":70375,"l":1,"d":125},{"t":70500,"l":0,"d":250},{"t":70750,"l":3,"d":125},{"t":70875,"l":1,"d":125},{"t":70875,"l":2,"d":125},{"t":71000,"l":0,"d":125},{"t":71375,"l":2,"d":125},{"t":71375,"l":1,"d":125},{"t":71625,"l":1,"d":125},{"t":71625,"l":2,"d":125},{"t":71875,"l":1,"d":125},{"t":71875,"l":2,"d":125},{"t":72000,"l":2,"d":125},{"t":72000,"l":1,"d":125},{"t":72500,"l":0,"d":125},{"t":72500,"l":3,"d":125},{"t":73125,"l":1,"d":125},{"t":73500,"l":2,"d":125},{"t":73625,"l":1,"d":125},{"t":73750,"l":2,"d":125},{"t":73875,"l":1,"d":125},{"t":73875,"l":2,"d":125},{"t":74250,"l":3,"d":125},{"t":74375,"l":0,"d":125},{"t":74625,"l":0,"d":125},{"t":74625,"l":3,"d":125},{"t":74750,"l":0,"d":125},{"t":74875,"l":3,"d":125},{"t":75250,"l":2,"d":125},{"t":75250,"l":1,"d":250},{"t":75500,"l":0,"d":125},{"t":75500,"l":3,"d":125},{"t":76000,"l":3,"d":125},{"t":76500,"l":2,"d":125},{"t":76875,"l":1,"d":125},{"t":77375,"l":0,"d":125},{"t":78000,"l":0,"d":125},{"t":78125,"l":1,"d":125},{"t":78375,"l":2,"d":125},{"t":78500,"l":3,"d":125},{"t":78750,"l":2,"d":250},{"t":79000,"l":1,"d":125},{"t":79875,"l":0,"d":125},{"t":79875,"l":3,"d":125},{"t":80125,"l":2,"d":125},{"t":80500,"l":3,"d":125},{"t":81000,"l":1,"d":125},{"t":81250,"l":0,"d":125},{"t":81500,"l":1,"d":125},{"t":81500,"l":2,"d":125},{"t":81625,"l":0,"d":125},{"t":81625,"l":3,"d":125},{"t":82000,"l":1,"d":125},{"t":82000,"l":2,"d":125},{"t":82375,"l":1,"d":125},{"t":82500,"l":2,"d":125},{"t":82625,"l":1,"d":125},{"t":82625,"l":2,"d":125},{"t":82875,"l":1,"d":125},{"t":83000,"l":2,"d":125},{"t":83125,"l":3,"d":125},{"t":83250,"l":0,"d":125},{"t":83500,"l":1,"d":125},{"t":83500,"l":2,"d":125},{"t":83625,"l":0,"d":125},{"t":83625,"l":3,"d":125},{"t":83875,"l":2,"d":125},{"t":83875,"l":1,"d":125},{"t":83875,"l":0,"d":125},{"t":83875,"l":3,"d":125},{"t":84375,"l":1,"d":2750},{"t":84375,"l":2,"d":2750}];
 
     const music = new Audio('music1.mp3');
@@ -124,32 +141,34 @@
 
     const keyMap = { 'd': 0, 'f': 1, 'j': 2, 'k': 3, 'D': 0, 'F': 1, 'J': 2, 'K': 3 };
 
+    // 教學與開始按鈕邏輯
+    document.getElementById('close-tutorial').addEventListener('click', () => {
+        document.getElementById('tutorial-overlay').style.display = 'none';
+        document.getElementById('start-overlay').style.display = 'flex';
+    });
+
+    document.getElementById('start-btn').addEventListener('click', () => {
+        document.getElementById('start-overlay').style.display = 'none';
+        music.play().then(() => {
+            gameActive = true;
+            requestAnimationFrame(gameLoop);
+        });
+    });
+
     function handleInput(lane, isDown) {
         if (lane === undefined) return;
         activeKeys[lane] = isDown;
-        if(isDown && !gameActive) {
-            gameActive = true;
-            music.play();
-            requestAnimationFrame(gameLoop);
-        }
     }
 
     window.addEventListener('keydown', (e) => { if (keyMap[e.key] !== undefined && !e.repeat) handleInput(keyMap[e.key], true); });
     window.addEventListener('keyup', (e) => { if (keyMap[e.key] !== undefined) handleInput(keyMap[e.key], false); });
 
     function addScore(type) {
-        let p = 0;
-        if(type === 'perfect') p = 100;
-        else if(type === 'great') p = 50;
-        else if(type === 'good') p = 10;
-
+        let p = (type === 'perfect') ? 100 : (type === 'great' ? 50 : (type === 'good' ? 10 : 0));
         if(type !== 'miss') {
             score += p; combo++; counts[type]++;
             if(combo > maxCombo) maxCombo = combo;
-        } else {
-            combo = 0; counts.miss++;
-        }
-        
+        } else { combo = 0; counts.miss++; }
         ratingDisplay.innerText = type.toUpperCase();
         ratingDisplay.className = 'rating-' + type;
         comboDisplay.innerText = combo;
@@ -175,12 +194,10 @@
         for(let i = notes.length-1; i >= 0; i--) {
             const n = notes[i];
             const tailTime = n.t + n.d;
-
             let hY = (n.d > 200 && now >= n.t && activeKeys[n.l] && !n.missed) ? judgeY : judgeY - (n.t - now) * speed;
             let tY = judgeY - (tailTime - now) * speed;
             let h = Math.abs(hY - tY);
             if (n.d <= 200) h = 45;
-
             n.el.style.top = tY + 'px';
             n.el.style.height = h + 'px';
 
@@ -200,23 +217,19 @@
             } else {
                 if (!n.hit && activeKeys[n.l]) {
                     const diff = Math.abs(n.t - now);
-                    if (diff < 50) { n.hit = true; addScore('perfect'); n.el.style.display='none'; }
-                    else if (diff < 100) { n.hit = true; addScore('great'); n.el.style.display='none'; }
-                    else if (diff < 150) { n.hit = true; addScore('good'); n.el.style.display='none'; }
+                    if (diff < 150) {
+                        n.hit = true; n.el.style.display='none';
+                        addScore(diff < 50 ? 'perfect' : (diff < 100 ? 'great' : 'good'));
+                    }
                 }
-                if (now > n.t + 150) { 
-                    if(!n.hit) addScore('miss');
-                    n.el.remove(); notes.splice(i, 1); 
-                }
+                if (now > n.t + 150) { if(!n.hit) addScore('miss'); n.el.remove(); notes.splice(i, 1); }
             }
         }
 
         if(music.ended || (spawnIndex >= sheetData.length && notes.length === 0)) {
             setTimeout(showResult, 2000);
             gameActive = false;
-        } else {
-            requestAnimationFrame(gameLoop);
-        }
+        } else { requestAnimationFrame(gameLoop); }
     }
 
     function showResult() {
@@ -226,7 +239,6 @@
         document.getElementById('res-gr').innerText = counts.great;
         document.getElementById('res-go').innerText = counts.good;
         document.getElementById('res-m').innerText = counts.miss;
-        document.getElementById('res-mc').innerText = maxCombo;
     }
 </script>
 </body>
