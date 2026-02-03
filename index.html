@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Master Grade - Ultimate</title>
+    <title>Master Grade - Ultimate Pro (Hold Fixed)</title>
     <style>
         :root { 
             --accent: #00d4ff; --perfect: #ffcf00; --great: #00ff8c; --good: #00d4ff; --miss: #ff4e4e;
         }
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; font-family: 'Segoe UI', sans-serif; color: #fff; user-select: none; }
         
-        /* 背景網格滾動 */
+        /* 背景滾動 */
         #bg-scroller {
             position: absolute; width: 200%; height: 200%; top: -50%; left: -50%;
             background-image: linear-gradient(rgba(0, 212, 255, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 212, 255, 0.1) 1px, transparent 1px);
@@ -20,45 +20,40 @@
 
         #game-container { position: relative; width: 100%; max-width: 500px; height: 100vh; margin: 0 auto; overflow: hidden; background: #0b0e11; z-index: 2; }
 
-        /* 選單滾動核心修正 */
+        /* 選單滾動 */
         #song-selection { 
             position: absolute; inset: 0; background: rgba(5,7,10,0.98); z-index: 10000; 
-            padding: 40px 20px; box-sizing: border-box;
-            overflow-y: auto; /* 允許垂直滾動 */
-            -webkit-overflow-scrolling: touch;
+            padding: 40px 20px; box-sizing: border-box; overflow-y: auto;
         }
-        /* 美化捲軸 */
-        #song-selection::-webkit-scrollbar { width: 6px; }
-        #song-selection::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
-
-        .song-card { background: rgba(255,255,255,0.05); border-radius: 12px; border: 1px solid #333; margin-bottom: 15px; transition: 0.3s; }
+        .song-card { background: rgba(255,255,255,0.05); border-radius: 12px; border: 1px solid #333; margin-bottom: 15px; }
         .song-card.selected { border-color: var(--accent); background: rgba(0,212,255,0.1); }
         .song-details { display: none; padding: 20px; border-top: 1px solid rgba(255,255,255,0.1); }
         .song-card.selected .song-details { display: block; }
 
-        /* 遊戲畫面 */
+        /* 遊戲區域 */
         #scene { position: absolute; width: 100%; height: 100%; perspective: 1000px; z-index: 3; }
-        #play-area { position: absolute; width: 100%; height: 100%; bottom: 0; transform-origin: center bottom; transition: transform 0.6s cubic-bezier(0.2, 0, 0.2, 1); }
+        #play-area { position: absolute; width: 100%; height: 100%; bottom: 0; transform-origin: center bottom; transition: transform 0.6s; }
         .mode-3d #play-area { transform: rotateX(45deg) scale(1.25); }
         .mode-2d #play-area { transform: rotateX(0deg) scale(1); }
 
         #lanes { position: absolute; left: 10%; width: 80%; height: 100%; background: rgba(0,0,0,0.85); border-left: 2px solid #444; border-right: 2px solid #444; display: flex; }
         .lane-line { flex: 1; border-right: 1px solid rgba(255,255,255,0.05); position: relative; }
-        #judge-line { position: absolute; left: 10%; width: 80%; height: 4px; background: #fff; bottom: 15%; z-index: 100; box-shadow: 0 0 20px #fff; }
+        #judge-line { position: absolute; left: 10%; width: 80%; height: 4px; background: #fff; bottom: 15%; z-index: 100; }
         
         .judge-flash { position: absolute; inset: 0; background: linear-gradient(to top, var(--accent), transparent); opacity: 0; pointer-events: none; }
         .active-flash { opacity: 0.4 !important; }
 
-        .note { position: absolute; width: 25%; background: #fff; height: 18px; z-index: 10; border-radius: 4px; }
-        .note.hold { background: linear-gradient(to top, var(--accent), rgba(0,212,255,0.3)); border-radius: 4px 4px 0 0; }
+        .note { position: absolute; width: 25%; background: #fff; height: 18px; z-index: 10; border-radius: 4px; box-shadow: 0 0 10px #fff; }
+        /* 長按音符身體樣式 */
+        .note.hold { background: linear-gradient(to top, var(--accent), rgba(0,212,255,0.5)); border-radius: 4px; border: 1px solid #fff; }
 
-        .m-btn { padding: 12px; background: #1a1a1a; border: 1px solid #444; color: #888; border-radius: 8px; cursor: pointer; font-weight: bold; flex: 1; border: none; }
+        .m-btn { padding: 12px; background: #1a1a1a; border: 1px solid #444; color: #888; border-radius: 8px; cursor: pointer; font-weight: bold; flex: 1; }
         .m-btn.active { background: var(--accent); color: #000; }
         
         #grade-display { position: absolute; top: 30px; left: 30px; font-size: 50px; font-weight: 900; z-index: 50; }
         #combo-container { position: absolute; top: 20%; width: 100%; text-align:center; z-index: 50; pointer-events:none; }
         #combo-num { font-size: 80px; font-weight: 900; margin: 0; }
-        #judge-tag { font-size: 30px; font-weight: 900; letter-spacing: 5px; }
+        #judge-tag { font-size: 30px; font-weight: 900; }
 
         #result-screen { position: absolute; inset: 0; background: rgba(0,0,0,0.95); z-index: 20000; display: none; flex-direction: column; align-items: center; justify-content: center; }
     </style>
@@ -85,9 +80,10 @@
     </div>
 
     <div id="song-selection">
-        <h1 style="text-align:center; letter-spacing:10px; color:var(--accent);">SONG LIST</h1>
+        <h1 style="text-align:center; letter-spacing:10px; color:var(--accent);">MISSION SELECT</h1>
         <div id="song-list"></div>
-        <div style="height: 100px;"></div> </div>
+        <div style="height: 100px;"></div>
+    </div>
 
     <div id="touch-layer" style="position:absolute; inset:0; z-index:5000; display:none;">
         <div style="width:25%;height:100%;float:left" onpointerdown="trigger(0)" onpointerup="release(0)"></div>
@@ -100,7 +96,7 @@
 </div>
 
 <script>
-    // 範例數據：測試選單滾動請多複製幾首
+    // 包含長按（d > 0）的譜面數據
     const songs = [
         {
             name: "【★★☆☆☆】Plead",
@@ -157,63 +153,46 @@
         songs.forEach((s, i) => {
             const div = document.createElement('div');
             div.className = 'song-card';
-            div.innerHTML = `
-                <div class="song-header" style="padding:25px; cursor:pointer;" onclick="selectCard(this)">
-                    <span style="font-size:22px; font-weight:bold;">${s.name}</span>
-                </div>
-                <div class="song-details">
-                    <div style="display:flex;gap:10px;margin-bottom:15px;">
-                        <button class="m-btn active" onclick="setMode('3d', this)">3D</button>
-                        <button class="m-btn" onclick="setMode('2d', this)">2D</button>
-                    </div>
-                    <button class="m-btn" style="width:100%;background:var(--accent);color:#000" onclick="startGame(${i})">PLAY</button>
-                </div>`;
+            div.innerHTML = `<div class="song-header" style="padding:25px; cursor:pointer;" onclick="selectCard(this)"><span style="font-size:22px; font-weight:bold;">${s.name}</span></div><div class="song-details"><div style="display:flex;gap:10px;margin-bottom:15px;"><button class="m-btn active" onclick="setMode('3d', this)">3D</button><button class="m-btn" onclick="setMode('2d', this)">2D</button></div><button class="m-btn" style="width:100%;background:var(--accent);color:#000" onclick="startGame(${i})">PLAY</button></div>`;
             list.appendChild(div);
         });
     }
 
-    function selectCard(el) {
-        document.querySelectorAll('.song-card').forEach(c => c.classList.remove('selected'));
-        el.parentElement.classList.add('selected');
-    }
-
-    function setMode(m, btn) {
-        event.stopPropagation();
-        document.body.className = `mode-${m}`;
-        btn.parentElement.querySelectorAll('.m-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-    }
+    function selectCard(el) { document.querySelectorAll('.song-card').forEach(c => c.classList.remove('selected')); el.parentElement.classList.add('selected'); }
+    function setMode(m, btn) { event.stopPropagation(); document.body.className = `mode-${m}`; btn.parentElement.querySelectorAll('.m-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
 
     function startGame(idx) {
-        currentSong = songs[idx];
-        music.src = currentSong.audio;
-        maxScore = Math.max(100, currentSong.sheet.length * 100);
+        currentSong = songs[idx]; music.src = currentSong.audio;
+        maxScore = currentSong.sheet.length * 100;
         combo = 0; score = 0; spawnIdx = 0; notes = [];
         hitCounts = { PERFECT: 0, GREAT: 0, GOOD: 0, MISS: 0 };
         document.getElementById('song-selection').style.display = 'none';
         document.getElementById('touch-layer').style.display = 'block';
-        gameActive = true;
-        music.play();
-        requestAnimationFrame(loop);
+        gameActive = true; music.play(); requestAnimationFrame(loop);
     }
 
+    // --- 核心：按鍵與長按偵測 ---
     function trigger(l) {
         if(keys[l]) return;
         keys[l] = true;
         document.getElementById(`flash-${l}`).classList.add('active-flash');
         if(!gameActive) return;
+        
         const now = music.currentTime * 1000;
         const target = notes.find(n => !n.hit && n.l === l && Math.abs(now - n.t) < 180);
         if(target) {
             const diff = Math.abs(now - target.t);
-            let rating = diff < 55 ? "PERFECT" : diff < 110 ? "GREAT" : "GOOD";
+            let rating = diff < 60 ? "PERFECT" : diff < 120 ? "GREAT" : "GOOD";
             target.hit = true;
-            if(target.d <= 200) target.el.remove();
-            combo++; score += (rating==="PERFECT"?100:rating==="GREAT"?80:50); updateUI(rating);
+            if(target.d <= 200) target.el.remove(); // 短音直接移除
+            combo++; score += (rating==="PERFECT"?100:80); updateUI(rating);
         }
     }
 
-    function release(l) { keys[l] = false; document.getElementById(`flash-${l}`).classList.remove('active-flash'); }
+    function release(l) { 
+        keys[l] = false; 
+        document.getElementById(`flash-${l}`).classList.remove('active-flash'); 
+    }
 
     window.onkeydown = e => { const k = {d:0, f:1, j:2, k:3}[e.key.toLowerCase()]; if(k !== undefined) trigger(k); };
     window.onkeyup = e => { const k = {d:0, f:1, j:2, k:3}[e.key.toLowerCase()]; if(k !== undefined) release(k); };
@@ -224,6 +203,7 @@
         const now = music.currentTime * 1000;
         const areaH = document.getElementById('play-area').offsetHeight;
 
+        // 生成
         while(spawnIdx < currentSong.sheet.length && now > currentSong.sheet[spawnIdx].t - 1500) {
             const d = currentSong.sheet[spawnIdx];
             const el = document.createElement('div');
@@ -235,13 +215,38 @@
             spawnIdx++;
         }
 
+        // 更新位置與長按邏輯
         for(let i=notes.length-1; i>=0; i--) {
             const n = notes[i];
             const diff = now - n.t;
             let currentBottom = 15 + (-diff * speed / areaH * 100);
-            n.el.style.bottom = currentBottom + '%';
+            
+            // Hold Note 長按邏輯
+            if(n.d > 200) {
+                if(n.hit && !n.cleared) {
+                    // 如果正在按下：裁切底部（造成縮短效果）
+                    if(keys[n.l]) {
+                        const overflow = (15 - currentBottom) / 100 * areaH;
+                        n.el.style.bottom = '15%'; 
+                        n.el.style.height = Math.max(0, (n.d - (now - n.t)) * speed) + 'px';
+                        if(now >= n.t + n.d) { 
+                            n.cleared = true; n.el.remove(); notes.splice(i,1); combo++; score+=100; updateUI("PERFECT"); continue;
+                        }
+                    } else {
+                        // 中途放開：判定為 MISS
+                        n.cleared = true; combo = 0; updateUI("MISS"); n.el.style.opacity = '0.3';
+                    }
+                } else {
+                    n.el.style.bottom = currentBottom + '%';
+                }
+            } else {
+                n.el.style.bottom = currentBottom + '%';
+            }
+
+            // Miss 判定 (短音或未按的長音開頭)
             if(!n.hit && diff > 180) { n.hit = true; combo = 0; updateUI("MISS"); n.el.style.opacity = '0.3'; }
-            if(diff > 450) { if(n.el.parentNode) n.el.remove(); notes.splice(i,1); }
+            // 清理過期音符
+            if(diff > 500 && n.el.parentNode) { n.el.remove(); notes.splice(i,1); }
         }
         requestAnimationFrame(loop);
     }
@@ -256,12 +261,10 @@
     }
 
     function showResult() {
-        const res = document.getElementById('result-screen');
-        res.style.display = 'flex';
+        const res = document.getElementById('result-screen'); res.style.display = 'flex';
         let acc = (score / maxScore) * 100;
-        res.innerHTML = `<h1>COMPLETE</h1><div style="font-size:80px">${document.getElementById('grade-display').innerText}</div><div>ACC: ${acc.toFixed(2)}%</div><button class="m-btn" style="margin-top:20px;width:150px" onclick="location.reload()">BACK</button>`;
+        res.innerHTML = `<h1>COMPLETE</h1><div style="font-size:80px">${document.getElementById('grade-display').innerText}</div><div>ACC: ${acc.toFixed(2)}%</div><button class="m-btn" style="margin-top:20px;width:150px" onclick="location.reload()">RETRY</button>`;
     }
-
     renderSongs();
 </script>
 </body>
